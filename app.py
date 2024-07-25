@@ -6,6 +6,7 @@ from get_by_date import get_by_date
 from dash import Dash, html, dcc, Input, Output, State
 from datetime import datetime, date
 from figure_maker import create_figure
+import os
 
 # Connect to the database and query data
 engine = create_engine(DATABASE_URI)
@@ -85,6 +86,8 @@ def update_output(n_clicks, date_text):
         html.Div(content)
         ])
 
-# Run the app
-if __name__ == '__main__':
-    app.run_server(debug=True)
+if __name__ == "__main__":
+    # Get the port from the environment variable (default to 8050 if not set)
+    port = int(os.environ.get("PORT", 8050))
+    # Run the app
+    app.run_server(host='0.0.0.0', port=port, debug=True)
