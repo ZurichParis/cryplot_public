@@ -32,6 +32,7 @@ ll_figure.update_layout(xaxis=dict(
 
 # get price info(actual prices if available, prediction prices) for specific date
 app = Dash(__name__)
+server = app.server
 app.layout = html.Div([
     html.Div([
         dcc.Markdown(f'### Introduction'),
