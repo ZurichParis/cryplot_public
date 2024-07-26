@@ -37,10 +37,10 @@ server = app.server
 app.layout = html.Div([
     html.Div([
         dcc.Markdown(f'### Introduction'),
-        html.P(f"100% return achieved every time everytime value Y(log2) increases by 1"),
+        html.P(f"100% return achieved everytime value Y(log2) increases by 1"),
         dcc.Markdown(f'### Model Info'),
         html.P(f"R2 Train: {'{:.4f}'.format(score_train)}"),
-        html.P(f"R2 Train: {'{:.4f}'.format(score_test)}"),
+        html.P(f"R2 Test: {'{:.4f}'.format(score_test)}"),
         dcc.Markdown(f'### BTC Prices {latest_day}'),
         html.Div(latest_content),
         html.Div([
