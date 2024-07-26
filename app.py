@@ -6,7 +6,6 @@ from get_by_date import get_by_date
 from dash import Dash, html, dcc, Input, Output, State
 from datetime import datetime, date
 from figure_maker import create_figure
-import os
 import dash_bootstrap_components as dbc
 
 # Connect to the database and query data
@@ -33,48 +32,37 @@ ll_figure.update_layout(xaxis=dict(
     ))
 
 # get price info(actual prices if available, prediction prices) for specific date
-
-app = Dash(__name__,external_stylesheets=[dbc.themes.BOOTSTRAP],
+app = Dash(__name__,
            meta_tags = [{'name':'viewport',
-                       'content': 'width=device-width, initial-scale=1, maximum-scale=2,minimun-scale=0.1'}])
-server = app.server
-app.layout = dbc.Container([
-    html.Hr(),
-    dbc.Row([
-        dbc.Col([
-            dcc.Markdown('# Introduction'),
-            html.P(f"""Log2 is used in Y axis for the btc daily prices. 
-                   Hence each time y value increased by 1, the btc price doubled. 
-                   The prediction(Red) achieved accuracy score of {'{:.2f}'.format(score_test)}."""),
-            html.P("Enter a future date then it tells you the predicted bitcoin price!"),
-        ],  xs=12, sm=12, md=12, lg=12, xl=12, className='side-panel'),        
-    ]),
-    html.Hr(),
-    dbc.Row([
-        dbc.Col([
-            dcc.Markdown(f'#### BTC Prices {latest_day}'),
-            html.Div(latest_content),
-            html.Div([
-                dcc.Input(
-                    id='date-input',
-                    type='text',
-                    placeholder='Enter a date (2024-01-01)',
-                    value='2024-01-01'),
-                html.Button('Click', id='submit-date', n_clicks=0),
-                html.Div(id='output-date', style={'marginTop': '10px'})
-            ]),
-        ],  xs=12, sm=12, md=4, lg=12, xl=12, className='side-panel')
-    ]),
-    html.Hr(),
-    dbc.Row([
-        dbc.Col([
-            dcc.Graph(id='log2-price-graph', figure=log2_figure),
-            dcc.Graph(id='price-graph', figure=fig),
-            dcc.Graph(id='loglog-price-graph', figure=ll_figure)
-        ], width=12, lg=9)
-    ]),
-], fluid=True)
-
+                       'content': 'width=device-width, initial-scale=0.1, maximum-scale=2,minimun-scale=0.1'}])
+app.layout = html.Div([
+    html.Div([
+        dcc.Markdown(f'### Introduction'),
+        html.P(f"100% return achieved everytime value Y(log2) increases by 1"),
+        dcc.Markdown(f'### Model Info'),
+        html.P(f"R2 Train: {'{:.4f}'.format(score_train)}"),
+        html.P(f"R2 Test: {'{:.4f}'.format(score_test)}"),
+        dcc.Markdown(f'### BTC Prices {latest_day}'),
+        html.Div(latest_content),
+        html.Div([
+            dcc.Input(
+                id='date-input',
+                type='text',
+                placeholder='Enter a date (2024-01-01)',
+                value='2024-01-01'),
+            html.Button('Click', id='submit-date', n_clicks=0),
+            html.Div(id='output-date', style={'marginTop': '10px'})
+            ])], 
+            style={'display': 'inline-block', 'width': '20%', 
+                   'verticalAlign': 'top', 'marginLeft': '20px', 'marginTop': '13px'}),
+    html.Div([
+        dcc.Graph(id='log2-price-graph', figure=log2_figure),
+        dcc.Graph(id='price-graph', figure=fig),
+        dcc.Graph(id='loglog-price-graph', figure=ll_figure)],
+        style={'display': 'inline-block', 
+               'width': '79%', 
+               'verticalAlign': 'top','marginLeft': '1%'})
+    ], style={'width': '100%', 'display': 'flex'})
 
 @app.callback(
     Output('output-date', 'children'),Input('submit-date', 'n_clicks'),
@@ -95,7 +83,7 @@ def update_output(n_clicks, date_text):
     content = get_by_date(df, date_object)
 
     return html.Div([
-        dcc.Markdown(f'#### BTC Prices {date_object}'),
+        dcc.Markdown(f'### BTC Prices {date_object}'),
         html.Div(content)
         ])
 
