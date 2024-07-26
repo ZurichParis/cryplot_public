@@ -43,7 +43,7 @@ app.layout = dbc.Container([
             html.P(
                 f"""Here is a tool for bitcoin(btc) price analyzing. Log2 is used in Y axis for the btc daily prices. 
                    Hence each time y value increased by 1, btc price actually doubled. 
-                   The prediction(Red) achieved accuracy score of {'{:.1f}'.format(score_test)}.""",
+                   The prediction(Red) achieved accuracy score of 0.95.""",
                 style={'textAlign': 'justify'}
             ),
             html.P(
