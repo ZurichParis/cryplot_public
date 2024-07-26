@@ -6,3 +6,4 @@ numpy==1.26.4
 sqlalchemy==2.0.28
 Flask==3.0.2
 scikit-learn==1.5.1
+dash-bootstrap-components==1.6.0
