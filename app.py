@@ -7,6 +7,7 @@ from dash import Dash, html, dcc, Input, Output, State
 from datetime import datetime, date
 from figure_maker import create_figure
 import dash_bootstrap_components as dbc
+import os
 
 # Connect to the database and query data
 engine = create_engine(DATABASE_URI)
