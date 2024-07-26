@@ -1,7 +1,6 @@
 from sqlalchemy import create_engine, text as sql_text
-from config import DATABASE_URI, score_test, score_train
+from config import DATABASE_URI, score_test, formator
 import pandas as pd
-from get_latest import get_latest_day
 from get_by_date import get_by_date
 from dash import Dash, html, dcc, Input, Output, State
 from datetime import datetime, date
@@ -15,9 +14,9 @@ query = "SELECT * FROM btc_prices"
 df = pd.read_sql_query(con=engine.connect(), 
                             sql=sql_text(query))
 
-# get price info(log2, actual) for the last availbale date in df
-latest_day = get_latest_day(df)
-latest_content = get_by_date(df,latest_day) # list of html.P objects
+# get price and date for the last availbale date in df
+latest_day = df.iloc[-1]['Date']
+latest_price = formator(df.iloc[-1]['Open'])
 
 # Create the figures
 fig = create_figure(df, 'Date', ['Open', 'Prediction'], 'BTC/USD')
@@ -33,37 +32,51 @@ ll_figure.update_layout(xaxis=dict(
     ))
 
 # get price info(actual prices if available, prediction prices) for specific date
-app = Dash(__name__,
+app = Dash(__name__,external_stylesheets=[dbc.themes.BOOTSTRAP],
            meta_tags = [{'name':'viewport',
-                       'content': 'width=device-width, initial-scale=0.1, maximum-scale=2,minimun-scale=0.1'}])
-app.layout = html.Div([
-    html.Div([
-        dcc.Markdown(f'### Introduction'),
-        html.P(f"100% return achieved everytime value Y(log2) increases by 1"),
-        dcc.Markdown(f'### Model Info'),
-        html.P(f"R2 Train: {'{:.4f}'.format(score_train)}"),
-        html.P(f"R2 Test: {'{:.4f}'.format(score_test)}"),
-        dcc.Markdown(f'### BTC Prices {latest_day}'),
-        html.Div(latest_content),
-        html.Div([
-            dcc.Input(
-                id='date-input',
-                type='text',
-                placeholder='Enter a date (2024-01-01)',
-                value='2024-01-01'),
-            html.Button('Click', id='submit-date', n_clicks=0),
-            html.Div(id='output-date', style={'marginTop': '10px'})
-            ])], 
-            style={'display': 'inline-block', 'width': '20%', 
-                   'verticalAlign': 'top', 'marginLeft': '20px', 'marginTop': '13px'}),
-    html.Div([
-        dcc.Graph(id='log2-price-graph', figure=log2_figure),
-        dcc.Graph(id='price-graph', figure=fig),
-        dcc.Graph(id='loglog-price-graph', figure=ll_figure)],
-        style={'display': 'inline-block', 
-               'width': '79%', 
-               'verticalAlign': 'top','marginLeft': '1%'})
-    ], style={'width': '100%', 'display': 'flex'})
+                       'content': 'width=device-width, initial-scale=1.o, maximum-scale=1.0, minimun-scale=1.0'}])
+app.layout = dbc.Container([
+    html.Hr(),
+    dbc.Row([
+        dbc.Col([
+            dcc.Markdown('# Introduction', style={'textAlign': 'center'}),
+            html.P(
+                f"""Here is a tool for bitcoin(btc) price analyzing. Log2 is used in Y axis for the btc daily prices. 
+                   Hence each time y value increased by 1, btc price actually doubled. 
+                   The prediction(Red) achieved accuracy score of {'{:.1f}'.format(score_test)}.""",
+                style={'textAlign': 'justify'}
+            ),
+            html.P(
+                "Enter a future date then it tells you the predicted bitcoin price!",
+                style={'textAlign': 'justify'}
+            ),
+        ],  xs=12, sm=12, md=12, lg=12, xl=12, className='side-panel'),        
+    ], className="justify-content-center"),
+    html.Hr(),
+    dbc.Row([
+        dbc.Col([
+            dcc.Markdown(f'''#### BTC Prices {latest_day}  \n\n ${latest_price}''', style={'textAlign': 'center'}),
+            html.Div([
+                dcc.Input(
+                    id='date-input',
+                    type='text',
+                    placeholder='Enter a date (2024-01-01)',
+                    value='2024-01-01'),
+                html.Button('Click', id='submit-date', n_clicks=0),
+                html.Div(id='output-date', style={'marginTop': '10px'})
+            ], style={'textAlign': 'center'}),
+        ],  xs=12, sm=12, md=12, lg=12, xl=12, className='side-panel')
+    ], className="justify-content-center"),
+    html.Hr(),
+    dbc.Row([
+        dbc.Col([
+            dcc.Graph(id='log2-price-graph', figure=log2_figure),
+            dcc.Graph(id='price-graph', figure=fig),
+            dcc.Graph(id='loglog-price-graph', figure=ll_figure)
+        ], width=12, lg=9)
+    ], className="justify-content-center"),
+], fluid=True)
+
 
 @app.callback(
     Output('output-date', 'children'),Input('submit-date', 'n_clicks'),
@@ -81,12 +94,12 @@ def update_output(n_clicks, date_text):
     min_date = date(2010, 7, 19)
     if date_object > max_date or date_object < min_date:
         return html.P('Date out of range. Please enter a date between 2010-07-19 and 2060-07-19')
-    content = get_by_date(df, date_object)
+    query_date, query_pred = get_by_date(df, date_object)
 
     return html.Div([
-        dcc.Markdown(f'### BTC Prices {date_object}'),
-        html.Div(content)
+        dcc.Markdown(f'''#### BTC Prediction {query_date} \n\n ${query_pred}'''),
         ])
+
 
 if __name__ == "__main__":
     # Get the port from the environment variable (default to 8050 if not set)
