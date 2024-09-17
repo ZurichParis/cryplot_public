@@ -7,6 +7,7 @@ from dash import Dash, html, dcc, Input, Output, State
 from datetime import datetime, date, timedelta
 import numpy as np
 from df_maker import df_maker
+import os
 # Load configs
 with open('configs.json', 'r') as f:
     configs = json.load(f)
@@ -206,4 +207,6 @@ def display_hover_info_2(hoverData):
 
 # Run the app
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    port = int(os.environ.get("PORT", 8050))
+    # Run the app
+    app.run_server(host='0.0.0.0', port=port, debug=True)
